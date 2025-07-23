@@ -17,19 +17,18 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
 
-            $table->enum('status', array_column(Status::cases(), 'value'))
-                ->default(Status::PENDING->value);
+            $table->string('status')->default(Status::PENDING->value);
 
             $table->string('debtor_name');
             $table->string('debtor_surname');
             $table->string('debtor_email');
             $table->string('debtor_document');
-            $table->enum('debtor_document_type', array_column(DocumentType::cases(), 'value'))
+            $table->string('debtor_document_type')
                 ->default(DocumentType::CC->value);
 
             $table->string('payment_reference');
             $table->string('payment_description');
-            $table->enum('payment_currency', array_column(Currency::cases(), 'value'))
+            $table->string('payment_currency')
                 ->default(Currency::COP->value);
             $table->decimal('payment_total', 12, 2);
             $table->boolean('payment_allow_partial')->default(false);
