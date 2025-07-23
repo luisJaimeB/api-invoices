@@ -20,3 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/invoice/search/', [InvoiceController::class, 'search']);
+Route::post('/invoice/hold', [InvoiceController::class, 'revoke'])->name('invoices.hold');
+Route::post('/invoice/settle/', [InvoiceController::class, 'settle'])->name('invoices.settle');

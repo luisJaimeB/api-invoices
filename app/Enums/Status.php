@@ -5,6 +5,7 @@ namespace App\Enums;
 enum Status: string
 {
     case ACTIVE = 'ACTIVE';
+    case HOLD = 'HOLD';
     case PENDING = 'PENDING';
     case EXPIRED = 'EXPIRED';
     case PAID = 'PAID';
@@ -13,6 +14,11 @@ enum Status: string
     public function isActive(): bool
     {
         return $this === self::ACTIVE;
+    }
+
+    public function isHold(): bool
+    {
+        return $this === self::HOLD;
     }
 
     public function isPending(): bool
