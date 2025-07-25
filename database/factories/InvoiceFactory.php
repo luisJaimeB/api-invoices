@@ -21,7 +21,7 @@ class InvoiceFactory extends Factory
     public function definition(): array
     {
         return [
-            'status' => fake()->randomElement(Status::cases())->value,
+            'status' => Status::ACTIVE->value,
 
             'debtor_document' => $this->faker->numerify('10400####'),
             'debtor_document_type' => fake()->randomElement(DocumentType::cases())->value,

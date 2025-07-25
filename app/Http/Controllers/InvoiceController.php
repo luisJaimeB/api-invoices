@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Services\AuthService;
 use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
+use App\Services\InvoiceSettleService;
 use App\Services\InvoiceStatusService;
 use App\Http\Requests\InvoiceHoldRequest;
 use App\Http\Requests\InvoiceSearchRequest;
@@ -18,12 +19,14 @@ class InvoiceController extends Controller
     private AuthService $authService;
     private InvoiceService $invoiceService;
     private InvoiceStatusService $invoiceStatusService;
+    private InvoiceSettleService $invoiceSettleService;
 
-    public function __construct(AuthService $authService, InvoiceService $invoiceService, InvoiceStatusService $invoiceStatusService)
+    public function __construct(AuthService $authService, InvoiceService $invoiceService, InvoiceStatusService $invoiceStatusService, InvoiceSettleService $invoiceSettleService)
     {
         $this->authService = $authService;
         $this->invoiceService = $invoiceService;
         $this->invoiceStatusService = $invoiceStatusService;
+        $this->invoiceSettleService = $invoiceSettleService;
     }
 
     public function search(InvoiceSearchRequest $request): JsonResponse
@@ -91,7 +94,42 @@ class InvoiceController extends Controller
         ]);
     }
 
+    public function settle(InvoiceSettleRequest $request): JsonResponse
+    {
+        $auth = $request->input('auth');
 
+        if (!$this->authService->validateCredentials($auth)) {
+            return $this->authFailed();
+        }
+
+        $result = $this->invoiceSettleService->searchByIdAndReference([
+            'id' => $request->input('id'),
+            'reference' => $request->input('reference'),
+        ]);
+
+        if (!$result['found']) {
+            return response()->json([
+                'status' => [
+                    'status' => 'FAILED',
+                    'reason' => $result['reason'],
+                    'message' => $result['message'],
+                    'date' => now()->toIso8601String(),
+                ]
+            ], 404);
+        }
+
+        $settleResult = $this->invoiceSettleService->settleInvoice($result['invoice'], $request->validated());
+
+        return response()->json([
+            'status' => [
+                'status' => 'OK',
+                'reason' => '00',
+                'message' => 'la petición se ha procesado correctamente',
+                'date' => now()->toIso8601String(),
+            ],
+            'receipt' => $settleResult['receipt'],
+        ]);
+    }
 
     private function authFailed(): JsonResponse
     {
