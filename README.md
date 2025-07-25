@@ -1,66 +1,267 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📄 API Invoices - Laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API RESTful para la gestión de facturas, desarrollada en **Laravel**, siguiendo principios **SOLID**, buenas prácticas y arquitectura limpia.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📚 Tabla de Contenidos
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [Requisitos](#requisitos)
+- [Instalación](#instalación)
+- [Configuración](#configuración)
+- [Ejecución](#ejecución)
+- [Pruebas](#pruebas)
+- [Endpoints Principales](#endpoints-principales)
+- [Autenticación](#autenticación)
+- [Ejemplo de Peticiones](#ejemplo-de-peticiones)
+- [Notas](#notas)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## ✅ Requisitos
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP >= 8.1  
+- Composer  
+- SQLite, MySQL o PostgreSQL  
+- Laravel >= 10.x  
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🚀 Instalación
 
-## Laravel Sponsors
+```bash
+git clone https://github.com/luisJaimeB/api-invoices.git
+cd api-invoices
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+---
 
-### Premium Partners
+## ⚙️ Configuración
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+Edita tu archivo `.env` con los siguientes valores mínimos:
 
-## Contributing
+```env
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY= # Llave generada por artisan key:generate
+APP_DEBUG=true
+APP_URL=http://localhost
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+DB_CONNECTION=sqlite
+# O configura MySQL/PostgreSQL según tu entorno
 
-## Code of Conduct
+API_LOGIN=tu_usuario_api
+API_SECRET=tu_clave_secreta
+API_SITE_ID=tu_site_id
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Luego configura las credenciales en `config/services.php`:
 
-## Security Vulnerabilities
+```php
+'api_auth' => [
+    'login' => env('API_LOGIN', 'usuario_api'),
+    'secret' => env('API_SECRET', 'clave_secreta'),
+],
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Crea la base de datos y ejecuta migraciones:
 
-## License
+```bash
+touch database/database.sqlite
+php artisan migrate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Pobla la base de datos con datos de prueba (opcional):
+
+```bash
+php artisan db:seed
+```
+
+---
+
+## ▶️ Ejecución
+
+```bash
+php artisan serve
+```
+
+---
+
+## 📌 Endpoints Principales
+
+| Método | Endpoint                    | Descripción                |
+|--------|-----------------------------|----------------------------|
+| POST   | `/api/invoices`             | Crear factura              |
+| POST   | `/api/invoices/search`      | Buscar factura             |
+| POST   | `/api/invoice/hold`         | Bloquear/activar factura   |
+| POST   | `/api/invoices/settle`      | Asentar (pagar) factura    |
+
+---
+
+## 🔐 Autenticación
+
+Todos los endpoints requieren un objeto `auth` en el cuerpo del JSON:
+
+```json
+"auth": {
+    "login":"personalizado_pruebas",
+    "secretKey":"secret",
+    "tranKey":"H/KXHl4AptMFZzTJyWNQWdSf1NOAr21Ln2Swg3BdGqA=","nonce":"NWF6bXY0OTlxbw==",
+    "seed":"2025-07-25T16:26:11-05:00"
+}
+```
+Pueden generarlo con el siguiente pre-request script para postman:
+
+```json
+var moment = require('moment')
+var CryptoJS = require('crypto-js')
+
+var auth = {
+    'login': pm.collectionVariables.get('login'),
+    'secretKey': pm.collectionVariables.get('secretKey')
+}
+
+var nonce = Math.random().toString(36).substring(2)
+var seed = moment().format()
+hash = CryptoJS.SHA256(nonce + seed + auth.secretKey)
+
+auth.tranKey = hash.toString(CryptoJS.enc.Base64)
+
+auth.nonce = btoa(nonce)
+auth.seed = seed
+
+console.log('nonce (plain):', nonce);
+console.log('nonce (base64):', btoa(nonce));
+console.log('seed:', seed);
+console.log('secretKey:', auth.secretKey);
+console.log('rawString:', nonce + seed + auth.secretKey);
+
+pm.environment.set('auth', JSON.stringify(auth))
+
+IdRondom = Math.floor(Math.random() * 1000000)
+
+pm.environment.set('IdRondom', IdRondom.toString())
+```
+
+---
+
+## 📤 Ejemplo de Peticiones
+
+### 🧾 Crear Factura
+
+```http
+POST /api/invoices
+Content-Type: application/json
+Accept: application/json
+```
+
+```json
+{
+  "auth": { ... },
+  "debtor_document": "104001234",
+  "debtor_document_type": "CC",
+  "debtor_name": "Juan",
+  "debtor_surname": "Pérez",
+  "debtor_email": "juan@example.com",
+  "payment_reference": "REF12345",
+  "payment_description": "Compra de producto",
+  "payment_currency": "COP",
+  "payment_total": 150000,
+  "payment_allow_partial": false,
+  "payment_subscribe": false,
+  "alt_reference": null,
+  "expiration_date": "2025-08-01T23:59:59-05:00"
+}
+```
+
+---
+
+### 🔍 Buscar Factura
+
+```http
+POST /api/invoices/search
+Content-Type: application/json
+Accept: application/json
+```
+
+```json
+{
+  "auth": { ... },
+    "agreement": "0000",
+    "searchType": "document",
+    "searchValue": "123456789",
+    "siteId": "tuSiteIdDePruebas"
+}
+```
+
+---
+
+### 🔒 HOLD (bloquear o activar factura)
+
+```http
+POST /api/invoice/hold
+Content-Type: application/json
+Accept: application/json
+```
+
+```json
+{
+  "auth": { ... },
+  "id": 1,
+  "reference": "REF12345",
+  "revoke": false,
+  "siteId": "tuSiteIdDePruebas"
+}
+```
+
+> `revoke: false` para **bloquear**, `true` para **activar**.
+
+---
+
+### 💳 Asentar Factura
+
+```http
+POST /api/invoices/settle
+Content-Type: application/json
+Accept: application/json
+```
+
+```json
+{
+  "auth": { ... },
+    "id": 1423,
+    "reference": "NCTPTJJD",
+    "agreement": "0000",
+    "authorization": "123456",
+    "receipt": "34567",
+    "method": "pse",
+    "franchise": "VISA",
+    "franchiseName": "VISA",
+    "issuerName": "BANCO DE PRUEBAS",
+    "lastDigits": null,
+    "provider": "provider",
+    "internalReference": 34567,
+    "amount": {
+        "currency": "COP",
+        "total": 19335.33
+    },
+    "date": "2025-07-25T15:49:37-05:00",
+    "channel": "PRUEBAS",
+    "paymentMethod": "VISA",
+    "location": "PRUEBAS",
+    "siteId": "tuSiteIdDePruebas",
+    "requestId": 12345,
+    "locale": "es_CO"
+}
+```
+
+---
+
+## 📝 Notas
+
+- Todos los endpoints responden en formato JSON.
+- Se recomienda usar HTTPS en entornos productivos.
+- Las fechas deben seguir el formato ISO 8601: `Y-m-d\TH:i:sP`.
