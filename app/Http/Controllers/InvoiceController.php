@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
-use Illuminate\Support\Js;
-use Illuminate\Http\Request;
 use App\Services\AuthService;
 use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
+use App\Services\InvoiceCreateService;
 use App\Services\InvoiceSettleService;
 use App\Services\InvoiceStatusService;
 use App\Http\Requests\InvoiceHoldRequest;
+use App\Http\Requests\InvoiceCreateRequest;
 use App\Http\Requests\InvoiceSearchRequest;
 use App\Http\Requests\InvoiceSettleRequest;
 
@@ -20,13 +19,20 @@ class InvoiceController extends Controller
     private InvoiceService $invoiceService;
     private InvoiceStatusService $invoiceStatusService;
     private InvoiceSettleService $invoiceSettleService;
+    private InvoiceCreateService $invoiceCreateService;
 
-    public function __construct(AuthService $authService, InvoiceService $invoiceService, InvoiceStatusService $invoiceStatusService, InvoiceSettleService $invoiceSettleService)
-    {
+    public function __construct(
+        AuthService $authService,
+        InvoiceService $invoiceService,
+        InvoiceStatusService $invoiceStatusService,
+        InvoiceSettleService $invoiceSettleService,
+        InvoiceCreateService $invoiceCreateService
+    ) {
         $this->authService = $authService;
         $this->invoiceService = $invoiceService;
         $this->invoiceStatusService = $invoiceStatusService;
         $this->invoiceSettleService = $invoiceSettleService;
+        $this->invoiceCreateService = $invoiceCreateService;
     }
 
     public function search(InvoiceSearchRequest $request): JsonResponse
@@ -129,6 +135,21 @@ class InvoiceController extends Controller
             ],
             'receipt' => $settleResult['receipt'],
         ]);
+    }
+
+    public function store(InvoiceCreateRequest $request)
+    {
+        $invoice = $this->invoiceCreateService->create($request->validated());
+
+        return response()->json([
+            'status' => [
+                'status' => 'OK',
+                'reason' => '00',
+                'message' => 'Factura creada correctamente',
+                'date' => now()->toIso8601String(),
+            ],
+            'data' => $this->invoiceService->transform($invoice),
+        ], 201);
     }
 
     private function authFailed(): JsonResponse
